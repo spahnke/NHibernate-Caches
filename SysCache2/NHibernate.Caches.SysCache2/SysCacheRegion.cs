@@ -76,6 +76,7 @@ namespace NHibernate.Caches.SysCache2
 		/// <param name="additionalProperties">Additional NHibernate configuration properties.</param>
 		public SysCacheRegion(string name, CacheRegionElement settings, IDictionary<string, string> additionalProperties)
 		{
+			Log.Debug("NHibernateUpdate -- Enter SysCacheRegion.ctor");
 			//validate the params
 			if (string.IsNullOrEmpty(name))
 			{
@@ -99,6 +100,8 @@ namespace NHibernate.Caches.SysCache2
 		/// <inheritdoc />
 		public void Clear()
 		{
+			Log.Debug("NHibernateUpdate -- Enter SysCacheRegion.Clear");
+
 			//remove the root cache item, this will cause all of the individual items to be removed from the cache
 			_webCache.Remove(_rootCacheKey);
 			_isRootItemCached = false;
@@ -109,14 +112,17 @@ namespace NHibernate.Caches.SysCache2
 		/// <inheritdoc />
 		public void Destroy()
 		{
+			Log.Debug("NHibernateUpdate -- Enter SysCacheRegion.Destroy");
 			Clear();
 		}
 
 		/// <inheritdoc />
 		public object Get(object key)
 		{
+			Log.Debug("NHibernateUpdate -- Enter SysCacheRegion.Get " + key);
 			if (key == null || _isRootItemCached == false)
 			{
+				Log.Debug("NHibernateUpdate -- SysCacheRegion.Get - key == null || _isRootItemCached == false");
 				return null;
 			}
 
@@ -128,23 +134,27 @@ namespace NHibernate.Caches.SysCache2
 			var cachedObject = _webCache.Get(cacheKey);
 			if (cachedObject == null)
 			{
+				Log.Debug("NHibernateUpdate -- SysCacheRegion.Get - miss");
 				return null;
 			}
 
 			//casting the object to a dictionary entry so we can verify that the item for the correct key was retrieved
 			var entry = (DictionaryEntry) cachedObject;
+			Log.Debug("NHibernateUpdate -- SysCacheRegion.Get - key.Equals(entry.Key) = " + key.Equals(entry.Key));
 			return key.Equals(entry.Key) ? entry.Value : null;
 		}
 
 		/// <inheritdoc />
 		public void Lock(object key)
 		{
+			Log.Debug("NHibernateUpdate -- Enter SysCacheRegion.Lock key = " + key);
 			//nothing to do here
 		}
 
 		/// <inheritdoc />
 		public long NextTimestamp()
 		{
+			Log.Debug("NHibernateUpdate -- Enter SysCacheRegion.NextTimestamp");
 			return Timestamper.Next();
 		}
 
@@ -152,6 +162,7 @@ namespace NHibernate.Caches.SysCache2
 		[SuppressMessage("Microsoft.Reliability", "CA2000:DisposeObjectsBeforeLosingScope")]
 		public void Put(object key, object value)
 		{
+			Log.Debug("NHibernateUpdate -- Enter SysCacheRegion.Put key = " + key + " value = " + value);
 			//validate the params
 			if (key == null)
 			{
@@ -212,6 +223,7 @@ namespace NHibernate.Caches.SysCache2
 		/// <inheritdoc />
 		public void Remove(object key)
 		{
+			Log.Debug("NHibernateUpdate -- Enter SysCacheRegion.Remove key = " + key);
 			if (key == null)
 			{
 				throw new ArgumentNullException(nameof(key));
@@ -231,6 +243,7 @@ namespace NHibernate.Caches.SysCache2
 		/// <inheritdoc />
 		public void Unlock(object key)
 		{
+			Log.Debug("NHibernateUpdate -- Enter SysCacheRegion.Unlock key = " + key);
 			//nothing to do since we arent locking
 		}
 
@@ -243,6 +256,7 @@ namespace NHibernate.Caches.SysCache2
 		/// <param name="additionalProperties">The additional properties supplied by NHibernate engine.</param>
 		private void Configure(CacheRegionElement settings, IDictionary<string, string> additionalProperties)
 		{
+			Log.Debug("NHibernateUpdate -- Enter SysCacheRegion.Configure");
 			Log.Debug("Configuring cache region");
 
 			// these are some default connection values that can be later used by the data dependencies
@@ -338,6 +352,7 @@ namespace NHibernate.Caches.SysCache2
 		private void CreateDependencyEnlisters(CacheDependenciesElement dependencyConfig, string defaultConnectionName,
 		                                       string defaultConnectionString)
 		{
+			Log.Debug("NHibernateUpdate -- Enter SysCacheRegion.CreateDependencyEnlisters");
 			//dont do anything if there is no config
 			if (dependencyConfig == null)
 			{
@@ -422,6 +437,7 @@ namespace NHibernate.Caches.SysCache2
 		/// <returns>The key to use for retrieving an element from the cache.</returns>
 		private string GetCacheKey(object identifier)
 		{
+			Log.Debug("NHibernateUpdate -- Enter SysCacheRegion.GetCacheKey identifier = " + identifier + "hashcode = " + identifier.GetHashCode());
 			return string.Concat(_cacheKeyPrefix, _name, ":", identifier.ToString(), "@", identifier.GetHashCode());
 		}
 
@@ -443,6 +459,7 @@ namespace NHibernate.Caches.SysCache2
 		/// </remarks>
 		private void CacheRootItem()
 		{
+			Log.Debug("NHibernateUpdate -- Enter SysCacheRegion.CacheRootItem");
 			Log.Debug("Creating root cache entry for cache region: {0}", _name);
 
 			//register ant cache dependencies for change notifications
@@ -494,6 +511,7 @@ namespace NHibernate.Caches.SysCache2
 		/// </remarks>
 		private void RootCacheItemRemovedCallback(string key, object value, CacheItemRemovedReason reason)
 		{
+			Log.Debug("NHibernateUpdate -- Enter SysCacheRegion.RootCacheItemRemovedCallback key = " + key + " value = " + value + " reason = " + reason);
 			Log.Debug("Cache items for region '{0}' have been removed from the cache for the following reason : {1:g}",
 			          _name, reason);
 
